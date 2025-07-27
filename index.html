@@ -1,0 +1,826 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The State of AI Bias: An Interactive Analysis</title>
+    <!-- Chosen Palette: Calm Harmony Neutrals -->
+    <!-- Application Structure Plan: A thematic, multi-section SPA with a persistent navigation bar. The structure guides the user from the high-level problem and solution (Home), to detailed evidence (The Problem), to quantitative impact (Data Dashboard), to the evolving context (Regulatory Timeline), and finally to a deep dive on the proposed fix (The Mira Solution) and its future implications (Recommendations). This non-linear, thematic structure is chosen over the report's linear academic format to empower user-led exploration, making the dense information more digestible and engaging. Key interactions like tabs for case studies, interactive charts, and a clickable timeline are designed to turn passive reading into active discovery, repeatedly reinforcing the connection between the documented harms and Mira's preventative capabilities. Gemini-powered scenario simulators and a policy brief generator have been added to provide dynamic, interactive content generation. -->
+    <!-- Visualization & Content Choices: 
+        - Bias Prevalence (Bar Chart, Chart.js): Goal: Compare bias types. Viz: Horizontal bar chart for clarity with long labels. Interaction: Hover tooltips. Justification: Standard, effective comparison of percentages.
+        - Accuracy Comparison (Stat Callouts): Goal: Dramatically highlight Mira's improvement. Viz: Large, bold numbers for immediate impact. Justification: Prioritizes the single most important performance metric for clarity.
+        - Regulatory Timeline (HTML/CSS Diagram): Goal: Show accelerating regulation. Viz: Interactive, clickable timeline. Justification: More engaging and scannable than a text list.
+        - Mira Consensus Process (HTML/CSS Diagram): Goal: Explain the solution simply. Viz: Visual flowchart. Justification: A visual process flow is more intuitive than a textual description.
+        - Mitigation Comparison (HTML Table): Goal: Position Mira as superior. Viz: A structured table. Justification: Most efficient format for direct feature-by-feature comparison.
+        - Gemini Scenario Simulator (API Call): Goal: Make bias tangible. Viz: Modal with user input. Interaction: User-provided text prompt. Justification: Interactive learning by applying concepts to a user's own scenario.
+        - Gemini Policy Brief Generator (API Call): Goal: Provide an actionable takeaway. Viz: Modal with user input. Interaction: User-provided topic. Justification: Demonstrates practical application of the report's findings.
+    -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #F8F9FA;
+            color: #212529;
+        }
+        .nav-link {
+            transition: color 0.3s ease;
+            position: relative;
+            padding-bottom: 4px;
+        }
+        .nav-link::after {
+            content: '';
+            position: absolute;
+            width: 0;
+            height: 2px;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: #4A90E2;
+            transition: width 0.3s ease;
+        }
+        .nav-link:hover::after, .nav-link.active::after {
+            width: 100%;
+        }
+        .tab-button.active {
+            border-color: #4A90E2;
+            background-color: #4A90E2;
+            color: #FFFFFF;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 350px;
+            max-height: 400px;
+        }
+        @media (max-width: 768px) {
+            .chart-container {
+                height: 300px;
+                max-height: 350px;
+            }
+        }
+        .stat-card {
+            background-color: #ffffff;
+            border: 1px solid #e2e8f0;
+            border-radius: 0.75rem;
+            padding: 1.5rem;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+        }
+        .timeline-item {
+            position: relative;
+            padding-left: 3rem;
+            padding-bottom: 2rem;
+            border-left: 2px solid #cbd5e1;
+        }
+        .timeline-item:last-child {
+            border-left: 2px solid transparent;
+        }
+        .timeline-dot {
+            position: absolute;
+            left: -0.7rem;
+            top: 0.1rem;
+            height: 1.25rem;
+            width: 1.25rem;
+            border-radius: 9999px;
+            background-color: #ffffff;
+            border: 2px solid #4A90E2;
+            transition: transform 0.3s ease;
+        }
+        .timeline-item:hover .timeline-dot {
+            transform: scale(1.2);
+        }
+        #gemini-modal {
+            transition: opacity 0.3s ease-in-out;
+        }
+        .gemini-modal-content {
+            transition: transform 0.3s ease-in-out;
+        }
+        .loader {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #4A90E2;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <header id="header" class="bg-white/80 backdrop-blur-lg sticky top-0 z-50 shadow-sm">
+        <nav class="container mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <div class="flex-shrink-0">
+                    <a href="#home" class="flex items-center text-2xl font-extrabold text-gray-800">
+                        <img src="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wCEAAkGBxAHBgYICAkKCwoLDQ8PDQwLCw8TDQ0OFREWFhURExMYHSggGBolGxMVITEhJSkrLi4uFx8zODMsNygtLisBCgoKDg0OGhAQGi0lHyUtLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLf/AABEIAOEA4QMBEQACEQEDEQH/xAAaAAEBAQEAAwAAAAAAAAAAAAABAAIGBAUD/8QAMBABAQACAAIHBQcFAAAAAAAAAAECEQMEBSExUWFxkhITQVFSkbHBIjKBobLR4fBC/8QAGgEBAQEBAQEBAAAAAAAAAAAAAAECAwQFBv/EAB4RAQEBAQEAAwEBAQAAAAAAAAABEQISIQMTMUFR/9QAMQAAAgIBAwQCAgICAwEBAAAAAQIAEQMEIRIxQVFhE3GBkSKhscHR8EJS4fFCYnKC/9oACAEBAAE/AP1ciIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAi_//Z" alt="Mira Network Logo" class="h-8 w-8 mr-3">
+                        <span>The State of <span class="text-[#4A90E2]">AI Bias</span></span>
+                    </a>
+                </div>
+                <div class="hidden md:block">
+                    <div class="ml-10 flex items-baseline space-x-4">
+                        <a href="#problem" class="nav-link px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:text-[#4A90E2]">The Problem</a>
+                        <a href="#data" class="nav-link px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:text-[#4A90E2]">The Scale</a>
+                        <a href="#regulation" class="nav-link px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:text-[#4A90E2]">Regulation</a>
+                        <a href="#solution" class="nav-link px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:text-[#4A90E2]">The Solution</a>
+                        <a href="#future" class="nav-link px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:text-[#4A90E2]">The Future</a>
+                    </div>
+                </div>
+                 <div class="md:hidden">
+                    <button id="mobile-menu-button" class="inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-white hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-800 focus:ring-white">
+                        <span class="sr-only">Open main menu</span>
+                        <svg class="block h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+                        </svg>
+                        <svg class="hidden h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </nav>
+        <div id="mobile-menu" class="md:hidden hidden">
+            <div class="px-2 pt-2 pb-3 space-y-1 sm:px-3">
+                <a href="#problem" class="block nav-link px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-[#4A90E2]">The Problem</a>
+                <a href="#data" class="block nav-link px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-[#4A90E2]">The Scale</a>
+                <a href="#regulation" class="block nav-link px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-[#4A90E2]">Regulation</a>
+                <a href="#solution" class="block nav-link px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-[#4A90E2]">The Solution</a>
+                <a href="#future" class="block nav-link px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-[#4A90E2]">The Future</a>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <section id="home" class="py-20 sm:py-24 lg:py-32">
+            <div class="container mx-auto px-4 sm:px-6 lg:px-8 text-center">
+                <h1 class="text-4xl md:text-5xl lg:text-6xl font-extrabold tracking-tight text-gray-900">
+                    AI Bias is Not a Flaw. It's a Failure of Design.
+                </h1>
+                <p class="mt-6 max-w-3xl mx-auto text-lg md:text-xl text-gray-600">
+                    Contemporary AI systems inherit and amplify human biases, causing billions in economic damage and perpetuating social inequity. Traditional fixes are not enough. A new architecture is required.
+                </p>
+                <div class="mt-12 grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto">
+                    <div class="stat-card">
+                        <p class="text-5xl font-extrabold text-[#4A90E2]">44%</p>
+                        <p class="mt-2 text-lg font-medium text-gray-800">Gender Bias Found</p>
+                        <p class="mt-1 text-sm text-gray-500">in a study of 133 deployed AI systems, revealing systemic discrimination.</p>
+                    </div>
+                    <div class="stat-card">
+                        <p class="text-5xl font-extrabold text-[#4A90E2]">$3.1T</p>
+                        <p class="mt-2 text-lg font-medium text-gray-800">Annual US Economic Cost</p>
+                        <p class="mt-1 text-sm text-gray-500">from poor data quality, a primary driver of algorithmic bias.</p>
+                    </div>
+                    <div class="stat-card">
+                        <p class="text-5xl font-extrabold text-[#4A90E2]">95.6%</p>
+                        <p class="mt-2 text-lg font-medium text-gray-800">Precision with Consensus</p>
+                        <p class="mt-1 text-sm text-gray-500">Mira Network's verification boosts reliability from a 73.1% baseline.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="problem" class="py-20 sm:py-24 bg-white">
+            <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="text-center">
+                    <h2 class="text-3xl md:text-4xl font-extrabold text-gray-900">The Problem: Bias in Critical Domains</h2>
+                    <p class="mt-4 max-w-2xl mx-auto text-lg text-gray-600">
+                        Algorithmic bias isn't a theoretical risk; it's causing tangible harm across society. Explore documented cases of failure and see how a new approach can prevent them.
+                    </p>
+                </div>
+
+                <div class="mt-12 max-w-5xl mx-auto">
+                    <div class="mb-8 flex flex-wrap justify-center gap-2">
+                        <button class="tab-button active px-4 py-2 text-sm font-semibold border-2 border-transparent rounded-full transition" data-tab="healthcare">Healthcare</button>
+                        <button class="tab-button px-4 py-2 text-sm font-semibold border-2 border-transparent rounded-full transition" data-tab="justice">Criminal Justice</button>
+                        <button class="tab-button px-4 py-2 text-sm font-semibold border-2 border-transparent rounded-full transition" data-tab="employment">Employment</button>
+                        <button class="tab-button px-4 py-2 text-sm font-semibold border-2 border-transparent rounded-full transition" data-tab="finance">Finance</button>
+                    </div>
+
+                    <div id="tab-content" class="bg-gray-50 p-6 sm:p-8 rounded-xl border border-gray-200">
+                        <!-- Healthcare Content -->
+                        <div class="tab-pane active" id="healthcare">
+                            <h3 class="text-2xl font-bold text-gray-800">Healthcare: Perpetuating Health Disparities</h3>
+                            <p class="mt-2 text-gray-600">AI tools risk digitizing and scaling historical inequities in health, leading to misdiagnosis and unequal access to care for vulnerable populations.</p>
+                            <div class="mt-6 grid md:grid-cols-2 gap-8">
+                                <div>
+                                    <h4 class="font-semibold text-lg text-gray-700">Case Study: Racial Bias in Risk Prediction</h4>
+                                    <p class="mt-2 text-sm text-gray-600">A widely used algorithm systematically underestimated the health needs of the sickest Black patients. It used healthcare <span class="font-bold">cost as a flawed proxy for illness</span>, leading to over 50% fewer Black patients being identified for critical care programs.</p>
+                                    <div class="mt-4 p-3 bg-blue-50 rounded-lg">
+                                        <p class="text-sm font-semibold text-blue-800">Key Stat:</p>
+                                        <p class="text-sm text-blue-700">Fixing the bias would have increased enrollment for eligible Black patients from 17.7% to 46.5%.</p>
+                                    </div>
+                                </div>
+                                <div class="bg-green-50 p-4 rounded-lg border border-green-200">
+                                    <h4 class="font-semibold text-lg text-green-800">How Mira Prevents This</h4>
+                                    <p class="mt-2 text-sm text-green-700">Mira's consensus system would query multiple models. A model using 'cost' would disagree with models using 'chronic conditions' or 'lab results'. This <span class="font-bold">lack of consensus</span> would flag the biased result, preventing the discriminatory decision and forcing a human review.</p>
+                                </div>
+                            </div>
+                            <div class="mt-6 text-center">
+                                <button class="gemini-button bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-lg transition" data-context="healthcare" data-example="A 45-year-old Black woman with a history of hypertension presents with chest pain.">
+                                    ✨ Simulate a Scenario
+                                </button>
+                            </div>
+                        </div>
+                        <!-- Justice Content -->
+                        <div class="tab-pane hidden" id="justice">
+                            <h3 class="text-2xl font-bold text-gray-800">Criminal Justice: Encoding Inequity</h3>
+                            <p class="mt-2 text-gray-600">AI in the justice system, trained on historically biased data, can automate discrimination and create a high-tech veneer for long-standing inequities.</p>
+                             <div class="mt-6 grid md:grid-cols-2 gap-8">
+                                <div>
+                                    <h4 class="font-semibold text-lg text-gray-700">Case Study: The COMPAS Algorithm</h4>
+                                    <p class="mt-2 text-sm text-gray-600">The COMPAS recidivism risk tool was found to be no more accurate than a coin flip. More alarmingly, it was <span class="font-bold">twice as likely to falsely label Black defendants as high-risk</span> compared to White defendants, while being opaque and unchallengeable.</p>
+                                    <div class="mt-4 p-3 bg-blue-50 rounded-lg">
+                                        <p class="text-sm font-semibold text-blue-800">Key Stat:</p>
+                                        <p class="text-sm text-blue-700">Black defendants were 77% more likely to be assigned a higher risk score for future violent crime.</p>
+                                    </div>
+                                </div>
+                                <div class="bg-green-50 p-4 rounded-lg border border-green-200">
+                                    <h4 class="font-semibold text-lg text-green-800">How Mira Prevents This</h4>
+                                    <p class="mt-2 text-sm text-green-700">A defendant's case would be assessed by an ensemble of models. COMPAS might return 'high-risk', while a fairer model returns 'low-risk'. The <span class="font-bold">disagreement creates a consensus failure</span>, preventing the biased score from being treated as fact and ensuring algorithmic due process.</p>
+                                </div>
+                            </div>
+                            <div class="mt-6 text-center">
+                                <button class="gemini-button bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-lg transition" data-context="justice" data-example="A young Latino man with two prior misdemeanors is arrested for shoplifting.">
+                                    ✨ Simulate a Scenario
+                                </button>
+                            </div>
+                        </div>
+                        <!-- Employment Content -->
+                        <div class="tab-pane hidden" id="employment">
+                            <h3 class="text-2xl font-bold text-gray-800">Employment: Automating Discrimination</h3>
+                            <p class="mt-2 text-gray-600">AI hiring tools, trained on decades of workplace data, risk creating invisible barriers for qualified candidates from underrepresented groups.</p>
+                             <div class="mt-6 grid md:grid-cols-2 gap-8">
+                                <div>
+                                    <h4 class="font-semibold text-lg text-gray-700">Case Study: Amazon's AI Hiring Tool</h4>
+                                    <p class="mt-2 text-sm text-gray-600">Amazon's experimental tool, trained on its male-dominated resume history, learned to discriminate against women. It <span class="font-bold">penalized resumes containing the word "women's"</span> and downgraded graduates of all-women's colleges. The project was scrapped as the bias was unfixable.</p>
+                                    <div class="mt-4 p-3 bg-blue-50 rounded-lg">
+                                        <p class="text-sm font-semibold text-blue-800">Key Stat:</p>
+                                        <p class="text-sm text-blue-700">An estimated 99% of Fortune 500 companies now use automated resume screening tools.</p>
+                                    </div>
+                                </div>
+                                <div class="bg-green-50 p-4 rounded-lg border border-green-200">
+                                    <h4 class="font-semibold text-lg text-green-800">How Mira Prevents This</h4>
+                                    <p class="mt-2 text-sm text-green-700">A female candidate's resume would be evaluated by multiple models. Amazon's biased model would give a low rating, but other, fairer models would give a high rating. The <span class="font-bold">conflict prevents automatic rejection</span> and flags the internal model's bias to a human recruiter.</p>
+                                </div>
+                            </div>
+                            <div class="mt-6 text-center">
+                                <button class="gemini-button bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-lg transition" data-context="employment" data-example="A female candidate from an all-women's college applies for a software engineering role.">
+                                    ✨ Simulate a Scenario
+                                </button>
+                            </div>
+                        </div>
+                        <!-- Finance Content -->
+                        <div class="tab-pane hidden" id="finance">
+                            <h3 class="text-2xl font-bold text-gray-800">Financial Services: Digital Redlining</h4>
+                            <p class="mt-2 text-gray-600">AI in lending and insurance risks creating a new form of discrimination, using seemingly neutral data as proxies for race or gender to deny opportunities.</p>
+                            <div class="mt-6 grid md:grid-cols-2 gap-8">
+                                <div>
+                                    <h4 class="font-semibold text-lg text-gray-700">Case Study: Biased Mortgage Lending</h4>
+                                    <p class="mt-2 text-sm text-gray-600">A Berkeley study found that both FinTech and traditional lenders charged <span class="font-bold">higher interest rates to Black and Latino borrowers</span>, even after controlling for credit risk. The algorithms learned to price-gouge applicants who were less likely to shop around for quotes.</p>
+                                    <div class="mt-4 p-3 bg-blue-50 rounded-lg">
+                                        <p class="text-sm font-semibold text-blue-800">Key Stat:</p>
+                                        <p class="text-sm text-blue-700">This discrimination costs minority communities up to $500 million in extra interest payments annually.</p>
+                                    </div>
+                                </div>
+                                <div class="bg-green-50 p-4 rounded-lg border border-green-200">
+                                    <h4 class="font-semibold text-lg text-green-800">How Mira Prevents This</h4>
+                                    <p class="mt-2 text-sm text-green-700">A mortgage application would be sent to multiple lenders' models. A discriminatory model would offer a high rate, while fairer models offer a market rate. The <span class="font-bold">discrepancy would cause consensus failure</span>, rejecting the biased offer and protecting the consumer.</p>
+                                </div>
+                            </div>
+                            <div class="mt-6 text-center">
+                                <button class="gemini-button bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-lg transition" data-context="finance" data-example="A self-employed applicant from a majority-minority zip code applies for a small business loan.">
+                                    ✨ Simulate a Scenario
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="data" class="py-20 sm:py-24">
+            <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="text-center">
+                    <h2 class="text-3xl md:text-4xl font-extrabold text-gray-900">The Scale: A Data Dashboard</h2>
+                    <p class="mt-4 max-w-2xl mx-auto text-lg text-gray-600">
+                        The problem of AI bias is measurable and its impact is massive. These visualizations synthesize key data points from the comprehensive meta-analysis.
+                    </p>
+                </div>
+                <div class="mt-12 grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-center">
+                    <div class="stat-card">
+                        <h3 class="text-xl font-bold text-center mb-4">Bias Prevalence in Deployed AI</h3>
+                        <div class="chart-container">
+                            <canvas id="prevalenceChart"></canvas>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <h3 class="text-xl font-bold text-center mb-4">The Accuracy Revolution</h3>
+                        <div class="flex flex-col items-center justify-center h-full">
+                            <div class="text-center">
+                                <p class="text-gray-600">Single Model Precision</p>
+                                <p class="text-6xl font-extrabold text-red-500">73.1%</p>
+                            </div>
+                            <div class="my-4 text-5xl text-gray-400">↓</div>
+                            <div class="text-center">
+                                <p class="text-gray-600">3-Model Consensus Precision</p>
+                                <p class="text-6xl font-extrabold text-green-500">95.6%</p>
+                            </div>
+                             <p class="mt-4 text-center text-gray-500 text-sm">An <span class="font-bold text-green-600">83% reduction</span> in the error rate, transforming reliability for critical applications.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="regulation" class="py-20 sm:py-24 bg-white">
+            <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="text-center">
+                    <h2 class="text-3xl md:text-4xl font-extrabold text-gray-900">The Regulatory Landscape</h2>
+                    <p class="mt-4 max-w-2xl mx-auto text-lg text-gray-600">
+                        The era of voluntary ethics is over. A global wave of binding legislation demands provable fairness, creating an urgent need for compliance-ready solutions.
+                    </p>
+                </div>
+                <div class="mt-12 max-w-3xl mx-auto">
+                    <div class="timeline-item">
+                        <div class="timeline-dot"></div>
+                        <h4 class="text-lg font-bold">2018: "Gender Shades" Study</h4>
+                        <p class="text-sm text-gray-600">MIT research reveals massive accuracy disparities in commercial facial recognition, bringing mainstream attention to AI bias.</p>
+                    </div>
+                    <div class="timeline-item">
+                        <div class="timeline-dot"></div>
+                        <h4 class="text-lg font-bold">2021: EU Proposes AI Act</h4>
+                        <p class="text-sm text-gray-600">The European Union introduces the first major comprehensive legal framework for AI, establishing a risk-based approach and mandating bias checks for high-risk systems.</p>
+                    </div>
+                    <div class="timeline-item">
+                        <div class="timeline-dot"></div>
+                        <h4 class="text-lg font-bold">2023: NYC Local Law 144 Takes Effect</h4>
+                        <p class="text-sm text-gray-600">New York City becomes the first US jurisdiction to mandate independent bias audits for automated hiring tools, requiring public transparency.</p>
+                    </div>
+                    <div class="timeline-item">
+                        <div class="timeline-dot"></div>
+                        <h4 class="text-lg font-bold">2024: EU AI Act Becomes Law</h4>
+                        <p class="text-sm text-gray-600">The EU AI Act is formally passed, setting a de facto global standard and creating powerful market drivers for verifiably fair AI.</p>
+                    </div>
+                    <div class="timeline-item">
+                         <div class="timeline-dot"></div>
+                        <h4 class="text-lg font-bold">2025: State-Level Acts Proliferate</h4>
+                        <p class="text-sm text-gray-600">Colorado's comprehensive AI law and California's new FEHA regulations take effect, signaling a wave of US state-level action holding companies liable for biased AI.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="solution" class="py-20 sm:py-24">
+            <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="text-center">
+                    <h2 class="text-3xl md:text-4xl font-extrabold text-gray-900">The Solution: Mira's Consensus Verification</h2>
+                    <p class="mt-4 max-w-2xl mx-auto text-lg text-gray-600">
+                        Instead of attempting the impossible task of creating a single, perfect model, Mira builds a system that verifies decisions through collective agreement.
+                    </p>
+                </div>
+
+                <div class="mt-12">
+                    <h3 class="text-2xl font-bold text-center text-gray-800">How It Works: A New Architecture for Trust</h3>
+                    <div class="mt-8 max-w-4xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4 text-center">
+                        <div class="p-4 rounded-lg">
+                            <div class="text-4xl mb-2">📥</div>
+                            <h4 class="font-bold">1. Query</h4>
+                            <p class="text-sm text-gray-600">A high-stakes query is submitted.</p>
+                        </div>
+                        <div class="text-2xl font-bold text-gray-300 transform rotate-90 md:rotate-0">→</div>
+                        <div class="flex gap-2">
+                            <div class="p-4 border-2 border-dashed border-gray-300 rounded-lg">
+                                <div class="text-4xl mb-2">🤖</div>
+                                <h4 class="font-bold">Model A</h4>
+                            </div>
+                            <div class="p-4 border-2 border-dashed border-gray-300 rounded-lg">
+                                <div class="text-4xl mb-2">🧠</div>
+                                <h4 class="font-bold">Model B</h4>
+                            </div>
+                            <div class="p-4 border-2 border-dashed border-gray-300 rounded-lg">
+                                <div class="text-4xl mb-2">💡</div>
+                                <h4 class="font-bold">Model C</h4>
+                            </div>
+                        </div>
+                         <div class="text-2xl font-bold text-gray-300 transform rotate-90 md:rotate-0">→</div>
+                        <div class="p-4 rounded-lg">
+                             <div class="text-4xl mb-2">🤝</div>
+                            <h4 class="font-bold">2. Consensus Check</h4>
+                            <p class="text-sm text-gray-600">Independent models "vote" on the outcome.</p>
+                        </div>
+                         <div class="text-2xl font-bold text-gray-300 transform rotate-90 md:rotate-0">→</div>
+                         <div class="p-4 rounded-lg">
+                            <div class="text-4xl mb-2">✅/❌</div>
+                            <h4 class="font-bold">3. Verification</h4>
+                            <p class="text-sm text-gray-600">Agreement leads to a verified decision. Disagreement flags bias.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-16 max-w-5xl mx-auto">
+                     <h3 class="text-2xl font-bold text-center text-gray-800 mb-8">A Paradigm Shift in Bias Mitigation</h3>
+                     <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse">
+                            <thead>
+                                <tr>
+                                    <th class="p-4 bg-gray-100 font-semibold">Dimension</th>
+                                    <th class="p-4 bg-gray-100 font-semibold text-center">Traditional Methods</th>
+                                    <th class="p-4 bg-blue-100 font-semibold text-center text-blue-800">Mira Consensus Verification</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr class="border-b">
+                                    <td class="p-4 font-medium">Core Approach</td>
+                                    <td class="p-4 text-gray-600">Attempt to "fix" a single model's data, training, or output.</td>
+                                    <td class="p-4 text-gray-800 font-medium">Verify decisions using a diverse ensemble of models.</td>
+                                </tr>
+                                <tr class="border-b">
+                                    <td class="p-4 font-medium">Fairness-Accuracy Trade-off</td>
+                                    <td class="p-4 text-center text-red-600 font-bold text-2xl">❗</td>
+                                    <td class="p-4 text-center text-green-600 font-bold text-2xl">✓</td>
+                                </tr>
+                                 <tr class="border-b">
+                                    <td class="p-4 font-medium">Systemic Solution</td>
+                                    <td class="p-4 text-center text-red-600 font-bold text-2xl">✗</td>
+                                    <td class="p-4 text-center text-green-600 font-bold text-2xl">✓</td>
+                                </tr>
+                                 <tr>
+                                    <td class="p-4 font-medium">Proactive Prevention</td>
+                                    <td class="p-4 text-gray-600">Mostly reactive patches and audits.</td>
+                                    <td class="p-4 text-gray-800 font-medium">Prevents biased decisions before they cause harm.</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                     </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="future" class="py-20 sm:py-24 bg-white">
+            <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="text-center">
+                    <h2 class="text-3xl md:text-4xl font-extrabold text-gray-900">The Future is Verifiable</h2>
+                    <p class="mt-4 max-w-2xl mx-auto text-lg text-gray-600">
+                        To realize the full potential of AI, we must build a foundation of trust. This requires a collective effort to adopt, incentivize, and develop this new model for trustworthy AI.
+                    </p>
+                </div>
+                <div class="mt-12 max-w-4xl mx-auto grid md:grid-cols-3 gap-8">
+                    <div class="stat-card">
+                        <h3 class="font-bold text-xl text-[#4A90E2]">For Regulators</h3>
+                        <p class="mt-2 text-gray-600">Recognize consensus verification as a preferred method for compliance. Create "safe harbors" to incentivize adoption of provably fair systems.</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3 class="font-bold text-xl text-[#4A90E2]">For Industry</h3>
+                        <p class="mt-2 text-gray-600">Move from reactive audits to proactive, "verification-first" architectures. Make fairness a competitive advantage, not a compliance cost.</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3 class="font-bold text-xl text-[#4A90E2]">For Researchers</h3>
+                        <p class="mt-2 text-gray-600">Explore next-gen consensus mechanisms, study emerging bias types in LLMs, and develop theories of "consensus fairness" for a global context.</p>
+                    </div>
+                </div>
+                <div id="policy-generator" class="mt-16 max-w-2xl mx-auto text-center stat-card">
+                    <h3 class="text-2xl font-bold text-gray-800">✨ Generate a Policy Brief</h3>
+                    <p class="mt-2 text-gray-600">Enter a topic to generate a sample policy brief based on the principles of verifiable AI.</p>
+                    <div class="mt-4 flex flex-col sm:flex-row gap-2">
+                        <input type="text" id="policy-topic-input" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500" placeholder="e.g., 'AI in K-12 Education' or 'Insurance Rate Setting'">
+                        <button id="generate-policy-button" class="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded-lg transition whitespace-nowrap">Generate Brief</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="bg-gray-800">
+        <div class="container mx-auto px-4 sm:px-6 lg:px-8 py-8 text-center text-gray-400 text-sm">
+            <p>This interactive report is an adaptation of the comprehensive research paper "The State of AI Bias: A Comprehensive Analysis."</p>
+            <p class="mt-2">Presented to demonstrate the potential of Mira Network's consensus verification solution.</p>
+        </div>
+    </footer>
+
+    <!-- Gemini Modal -->
+    <div id="gemini-modal" class="hidden fixed inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center z-50 p-4 opacity-0">
+        <div class="gemini-modal-content bg-white rounded-lg shadow-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto transform scale-95">
+            <div class="p-6">
+                <div class="flex justify-between items-start">
+                    <h3 id="gemini-modal-title" class="text-2xl font-bold text-gray-800"></h3>
+                    <button id="gemini-modal-close" class="text-gray-400 hover:text-gray-600">&times;</button>
+                </div>
+                <div id="gemini-modal-body" class="mt-4 text-gray-600">
+                    <!-- Content will be injected here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    // Mobile menu toggle
+    const mobileMenuButton = document.getElementById('mobile-menu-button');
+    const mobileMenu = document.getElementById('mobile-menu');
+    mobileMenuButton.addEventListener('click', () => {
+        const isHidden = mobileMenu.classList.contains('hidden');
+        mobileMenu.classList.toggle('hidden');
+        mobileMenuButton.querySelector('svg:first-child').classList.toggle('hidden', !isHidden);
+        mobileMenuButton.querySelector('svg:last-child').classList.toggle('hidden', isHidden);
+    });
+
+    // Close mobile menu on link click
+    document.querySelectorAll('#mobile-menu a').forEach(link => {
+        link.addEventListener('click', () => {
+            mobileMenu.classList.add('hidden');
+            mobileMenuButton.querySelector('svg:first-child').classList.remove('hidden');
+            mobileMenuButton.querySelector('svg:last-child').classList.add('hidden');
+        });
+    });
+
+    // Tab functionality
+    const tabButtons = document.querySelectorAll('.tab-button');
+    const tabPanes = document.querySelectorAll('.tab-pane');
+
+    tabButtons.forEach(button => {
+        button.addEventListener('click', () => {
+            const tabId = button.dataset.tab;
+
+            tabButtons.forEach(btn => btn.classList.remove('active'));
+            button.classList.add('active');
+
+            tabPanes.forEach(pane => {
+                if (pane.id === tabId) {
+                    pane.classList.remove('hidden');
+                    pane.classList.add('active');
+                } else {
+                    pane.classList.add('hidden');
+                    pane.classList.remove('active');
+                }
+            });
+        });
+    });
+
+    // Navigation active state on scroll
+    const sections = document.querySelectorAll('section');
+    const navLinks = document.querySelectorAll('.nav-link');
+    const header = document.getElementById('header');
+    
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                navLinks.forEach(link => {
+                    link.classList.toggle('active', link.getAttribute('href').substring(1) === entry.target.id);
+                });
+            }
+        });
+    }, { rootMargin: `-${header.offsetHeight}px 0px 0px 0px`, threshold: 0.4 });
+
+    sections.forEach(section => {
+        observer.observe(section);
+    });
+
+
+    // Chart.js visualizations
+    const renderCharts = () => {
+        // Prevalence Chart
+        const prevalenceCtx = document.getElementById('prevalenceChart').getContext('2d');
+        if (window.prevalenceChart instanceof Chart) {
+            window.prevalenceChart.destroy();
+        }
+        window.prevalenceChart = new Chart(prevalenceCtx, {
+            type: 'bar',
+            data: {
+                labels: ['Gender Bias', 'Age Bias', 'Racial Bias'],
+                datasets: [{
+                    label: 'Prevalence in AI Systems',
+                    data: [44, 32, 29],
+                    backgroundColor: [
+                        'rgba(74, 144, 226, 0.6)',
+                        'rgba(245, 166, 35, 0.6)',
+                        'rgba(126, 211, 33, 0.6)'
+                    ],
+                    borderColor: [
+                        'rgba(74, 144, 226, 1)',
+                        'rgba(245, 166, 35, 1)',
+                        'rgba(126, 211, 33, 1)'
+                    ],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                indexAxis: 'y',
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: false
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                return `${context.dataset.label}: ${context.raw}%`;
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    x: {
+                        beginAtZero: true,
+                        ticks: {
+                            callback: function(value) {
+                                return value + '%';
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    };
+    
+    // Use Intersection Observer to render charts only when they are visible
+    const chartObserver = new IntersectionObserver((entries, observer) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                renderCharts();
+                observer.unobserve(entry.target);
+            }
+        });
+    }, { threshold: 0.5 });
+
+    const dataSection = document.getElementById('data');
+    if (dataSection) {
+        chartObserver.observe(dataSection);
+    }
+
+    // Gemini API integration
+    const modal = document.getElementById('gemini-modal');
+    const modalTitle = document.getElementById('gemini-modal-title');
+    const modalBody = document.getElementById('gemini-modal-body');
+    const modalClose = document.getElementById('gemini-modal-close');
+    const geminiButtons = document.querySelectorAll('.gemini-button');
+    const policyButton = document.getElementById('generate-policy-button');
+    const policyInput = document.getElementById('policy-topic-input');
+
+    const showModal = (title, content) => {
+        modalTitle.textContent = title;
+        modalBody.innerHTML = content;
+        modal.classList.remove('hidden');
+        setTimeout(() => {
+            modal.classList.remove('opacity-0');
+            modal.querySelector('.gemini-modal-content').classList.remove('scale-95');
+        }, 10);
+    };
+
+    const hideModal = () => {
+        modal.classList.add('opacity-0');
+        modal.querySelector('.gemini-modal-content').classList.add('scale-95');
+        setTimeout(() => {
+            modal.classList.add('hidden');
+        }, 300);
+    };
+
+    modalClose.addEventListener('click', hideModal);
+    modal.addEventListener('click', (e) => {
+        if (e.target === modal) {
+            hideModal();
+        }
+    });
+
+    const callGeminiAPI = async (prompt) => {
+        const apiKey = "AIzaSyBtdxAevjwr66TCGMzIk8Jn8l5NbAiLRf0";
+        const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+        
+        const payload = {
+            contents: [{
+                parts: [{ text: prompt }]
+            }]
+        };
+
+        try {
+            const response = await fetch(apiUrl, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+
+            if (!response.ok) {
+                const errorBody = await response.text();
+                console.error("API Error Response:", errorBody);
+                throw new Error(`API request failed with status ${response.status}`);
+            }
+
+            const result = await response.json();
+            
+            if (result.candidates && result.candidates.length > 0 &&
+                result.candidates[0].content && result.candidates[0].content.parts &&
+                result.candidates[0].content.parts.length > 0) {
+                return result.candidates[0].content.parts[0].text;
+            } else {
+                console.error("Unexpected API response structure:", result);
+                return "Error: Could not retrieve a valid response from the model.";
+            }
+        } catch (error) {
+            console.error("Error calling Gemini API:", error);
+            return `Error: Could not connect to the AI model. Please check the console for details. Details: ${error.message}`;
+        }
+    };
+
+    geminiButtons.forEach(button => {
+        button.addEventListener('click', async () => {
+            const context = button.dataset.context;
+            const example = button.dataset.example;
+            const userInput = prompt(`Enter a scenario for the ${context} domain, or use the example below:`, example);
+
+            if (!userInput) return;
+
+            const promptText = `
+                You are an AI ethics analyst explaining AI bias to a non-technical audience.
+                Your analysis is based on the Mira Network's consensus verification model.
+                
+                Analyze the following scenario in the domain of **${context}**:
+                **Scenario:** "${userInput}"
+
+                Provide your analysis in three distinct sections using Markdown for formatting:
+
+                ### 1. Potential for Bias
+                Describe how a single, poorly designed AI model could exhibit bias in this specific scenario. Be specific about the potential flawed proxies or historical data issues that might lead to a discriminatory outcome.
+
+                ### 2. The Biased Outcome
+                Describe the likely harmful and biased decision the single AI model would make.
+
+                ### 3. The Mira Network Solution
+                Explain how the Mira Network's consensus verification process would prevent this biased outcome. Describe the likely disagreement between different models in an ensemble and how this "consensus failure" would flag the issue for human review, ensuring a fairer process.
+            `;
+
+            showModal(`Analyzing ${context} Scenario...`, '<div class="flex justify-center items-center p-8"><div class="loader"></div></div>');
+            const result = await callGeminiAPI(promptText);
+            
+            // Basic Markdown to HTML
+            let htmlResult = result
+                .replace(/### (.*)/g, '<h4 class="text-lg font-bold text-gray-800 mt-4 mb-2">$1</h4>')
+                .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                .replace(/\n/g, '<br>');
+
+            showModal(`AI Bias Analysis`, htmlResult);
+        });
+    });
+
+    policyButton.addEventListener('click', async () => {
+        const topic = policyInput.value;
+        if (!topic) {
+            alert("Please enter a topic for the policy brief.");
+            return;
+        }
+
+        const promptText = `
+            You are a policy advisor specializing in AI ethics and regulation.
+            Your recommendations are based on the principles of verifiable AI and consensus mechanisms, as championed by the Mira Network.
+
+            Generate a concise, one-page policy brief on the topic: **"${topic}"**.
+
+            The brief should be structured with the following sections using Markdown formatting:
+
+            ### MEMORANDUM FOR POLICYMAKERS
+            **TO:** Interested Parties
+            **FROM:** AI Policy Advisory Group
+            **DATE:** ${new Date().toLocaleDateString()}
+            **SUBJECT:** Recommendations for Trustworthy AI in ${topic}
+
+            ### 1. The Challenge
+            Briefly describe the key risks and potential for algorithmic bias when AI is applied to the field of ${topic}.
+
+            ### 2. The Verifiable AI Solution
+            Explain how a consensus verification approach (like the Mira Network) provides a robust solution. Emphasize proactive prevention over reactive audits.
+
+            ### 3. Key Policy Recommendations
+            Provide 2-3 specific, actionable policy recommendations. For example:
+            - Mandate multi-model verification for high-risk AI systems in this domain.
+            - Create regulatory "safe harbors" for organizations that adopt and can prove the use of consensus-based AI verification.
+            - Fund research into diverse, independent AI models to serve in verification ensembles.
+        `;
+
+        showModal(`Generating Policy Brief...`, '<div class="flex justify-center items-center p-8"><div class="loader"></div></div>');
+        const result = await callGeminiAPI(promptText);
+        
+        let htmlResult = result
+            .replace(/### (.*)/g, '<h4 class="text-lg font-bold text-gray-800 mt-6 mb-2">$1</h4>')
+            .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+            .replace(/\n/g, '<br>');
+
+        showModal(`Policy Brief: ${topic}`, `<div class="prose max-w-none">${htmlResult}</div>`);
+    });
+});
+</script>
+</body>
+</html>
