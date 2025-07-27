@@ -993,34 +993,31 @@ Ensure all recommendations are evidence-based and cite relevant regulations wher
             if (!userInput) return;
 
             const promptText = `
-                You are an AI ethics analyst explaining AI bias to a non-technical audience.
-                Your analysis is based on the Mira Network's consensus verification model.
-                
                 Analyze the following scenario in the domain of **${context}**:
                 **Scenario:** "${userInput}"
 
-                Provide your analysis in three distinct sections using Markdown for formatting:
-
-                ### 1. Potential for Bias
-                Describe how a single, poorly designed AI model could exhibit bias in this specific scenario. Be specific about the potential flawed proxies or historical data issues that might lead to a discriminatory outcome.
-
-                ### 2. The Biased Outcome
-                Describe the likely harmful and biased decision the single AI model would make.
-
-                ### 3. The Mira Network Solution
-                Explain how the Mira Network's consensus verification process would prevent this biased outcome. Describe the likely disagreement between different models in an ensemble and how this "consensus failure" would flag the issue for human review, ensuring a fairer process.
+                Please provide a comprehensive analysis showing:
+                1. How current AI systems might exhibit bias in this scenario
+                2. The potential harmful outcomes for affected individuals
+                3. How Mira Network's consensus verification would prevent these outcomes
+                4. Technical implementation suggestions for the consensus approach
+                5. Metrics to measure success of the bias prevention
             `;
 
             showModal(`Analyzing ${context} Scenario...`, '<div class="flex justify-center items-center p-8"><div class="loader"></div></div>');
-            const result = await callGeminiAPI(promptText);
+            const result = await callGeminiAPI(promptText, 'scenario');
             
-            // Basic Markdown to HTML
+            // Enhanced Markdown to HTML conversion
             let htmlResult = result
-                .replace(/### (.*)/g, '<h4 class="text-lg font-bold text-gray-800 mt-4 mb-2">$1</h4>')
-                .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                .replace(/### (.*)/g, '<h4 class="text-lg font-bold text-gray-800 mt-6 mb-3 border-b border-gray-200 pb-2">$1</h4>')
+                .replace(/## (.*)/g, '<h3 class="text-xl font-bold text-gray-800 mt-8 mb-4">$1</h3>')
+                .replace(/\*\*(.*?)\*\*/g, '<strong class="text-blue-600">$1</strong>')
+                .replace(/\*(.*?)\*/g, '<em>$1</em>')
+                .replace(/- (.*)/g, '<li class="ml-4 mb-1">$1</li>')
+                .replace(/\n\n/g, '<br><br>')
                 .replace(/\n/g, '<br>');
 
-            showModal(`AI Bias Analysis`, htmlResult);
+            showModal(`AI Bias Analysis: ${context}`, `<div class="prose max-w-none">${htmlResult}</div>`);
         });
     });
 
