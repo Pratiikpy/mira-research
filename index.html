@@ -878,14 +878,81 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    const callGeminiAPI = async (prompt) => {
+    const callGeminiAPI = async (prompt, context = 'general') => {
         const apiKey = "AIzaSyBtdxAevjwr66TCGMzIk8Jn8l5NbAiLRf0";
         const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
         
+        // Enhanced prompts based on context
+        const enhancedPrompts = {
+            scenario: `You are a senior AI ethics researcher and consultant specializing in algorithmic bias detection and mitigation. Your analysis should be thorough, technically accurate, and actionable.
+
+Context: You are analyzing real-world AI bias scenarios to demonstrate how consensus verification can prevent discrimination.
+
+Instructions: ${prompt}
+
+Please provide a comprehensive analysis structured as follows:
+
+### 🔍 Bias Analysis
+Identify specific mechanisms of bias (training data issues, proxy variables, historical patterns, etc.)
+
+### ⚠️ Potential Harms
+Describe concrete impacts on individuals and society, including quantifiable costs where possible
+
+### 🛡️ Mira Consensus Solution
+Explain specifically how 3+ diverse models would likely disagree, creating a consensus failure that prevents the biased outcome
+
+### 📊 Technical Implementation
+Suggest specific model architectures, data sources, or fairness metrics that would be effective
+
+### 📈 Success Metrics
+Recommend how to measure the effectiveness of the consensus verification approach
+
+Format your response with clear headings and actionable insights. Focus on technical accuracy and practical implementation.`,
+
+            policy: `You are a senior policy advisor with expertise in AI governance, regulation, and digital rights. Your recommendations should be legally sound, politically feasible, and technically informed.
+
+Context: You are drafting policy recommendations for government officials and industry leaders on AI bias regulation.
+
+Instructions: ${prompt}
+
+Please structure your policy brief as follows:
+
+### 📋 EXECUTIVE SUMMARY
+Brief overview of the issue and key recommendations (2-3 sentences)
+
+### 🎯 POLICY OBJECTIVES
+Clear, measurable goals for regulation
+
+### 📊 CURRENT LANDSCAPE
+Overview of existing regulations and gaps
+
+### 🔧 SPECIFIC RECOMMENDATIONS
+Actionable policy proposals with implementation timelines
+
+### 💼 STAKEHOLDER IMPACTS
+How different groups (industry, consumers, government) would be affected
+
+### 📈 IMPLEMENTATION ROADMAP
+Phased approach with milestones and success metrics
+
+### 🌐 INTERNATIONAL CONSIDERATIONS
+Alignment with global standards and trade implications
+
+Ensure all recommendations are evidence-based and cite relevant regulations where applicable.`
+        };
+        
+        const finalPrompt = enhancedPrompts[context] || prompt;
+        
         const payload = {
             contents: [{
-                parts: [{ text: prompt }]
-            }]
+                parts: [{ text: finalPrompt }]
+            }],
+            generationConfig: {
+                temperature: 0.7,
+                maxOutputTokens: 2048,
+                topK: 40,
+                topP: 0.95
+            }
         };
 
         try {
