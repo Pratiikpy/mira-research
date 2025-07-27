@@ -901,6 +901,102 @@ document.addEventListener('DOMContentLoaded', () => {
 
         showModal(`Policy Brief: ${topic}`, `<div class="prose max-w-none">${htmlResult}</div>`);
     });
+
+    // Bias Risk Calculator functionality
+    const calculateRiskButton = document.getElementById('calculate-risk');
+    const riskResults = document.getElementById('risk-results');
+    const riskScore = document.getElementById('risk-score');
+    const riskLevel = document.getElementById('risk-level');
+    const riskBreakdown = document.getElementById('risk-breakdown');
+    const riskRecommendations = document.getElementById('risk-recommendations');
+
+    calculateRiskButton.addEventListener('click', () => {
+        const industry = document.getElementById('industry-select').value;
+        const systemType = document.getElementById('system-select').value;
+        const datasetSize = document.getElementById('dataset-select').value;
+        const auditLevel = document.getElementById('audit-select').value;
+
+        // Risk calculation logic
+        let baseRisk = 0;
+        let riskFactors = [];
+
+        // Industry risk factors
+        const industryRisks = {
+            'healthcare': { risk: 35, factor: 'Healthcare decisions directly impact patient outcomes' },
+            'finance': { risk: 30, factor: 'Financial decisions affect economic opportunities' },
+            'hiring': { risk: 40, factor: 'Employment decisions impact career prospects' },
+            'justice': { risk: 45, factor: 'Criminal justice has severe liberty implications' },
+            'education': { risk: 25, factor: 'Educational decisions shape future opportunities' }
+        };
+
+        // System type risk factors
+        const systemRisks = {
+            'classification': { risk: 20, factor: 'Binary decisions can create stark disparities' },
+            'regression': { risk: 15, factor: 'Continuous outputs may embed subtle biases' },
+            'nlp': { risk: 25, factor: 'Language models reflect cultural biases' },
+            'computer-vision': { risk: 30, factor: 'Visual recognition shows demographic disparities' },
+            'recommendation': { risk: 20, factor: 'Recommendations can create filter bubbles' }
+        };
+
+        // Dataset size risk factors
+        const datasetRisks = {
+            'small': { risk: 25, factor: 'Small datasets may lack representative samples' },
+            'medium': { risk: 15, factor: 'Medium datasets provide moderate representation' },
+            'large': { risk: 10, factor: 'Large datasets generally improve representation' }
+        };
+
+        // Audit level risk mitigation
+        const auditMitigation = {
+            'none': { reduction: 0, factor: 'No bias assessment conducted' },
+            'basic': { reduction: 15, factor: 'Basic internal review provides limited insight' },
+            'comprehensive': { reduction: 30, factor: 'Third-party audit significantly reduces risk' }
+        };
+
+        // Calculate total risk
+        baseRisk += industryRisks[industry].risk;
+        baseRisk += systemRisks[systemType].risk;
+        baseRisk += datasetRisks[datasetSize].risk;
+        baseRisk -= auditMitigation[auditLevel].reduction;
+
+        // Ensure risk stays within bounds
+        baseRisk = Math.max(5, Math.min(95, baseRisk));
+
+        // Add risk factors to breakdown
+        riskFactors.push(`Industry: ${industryRisks[industry].factor}`);
+        riskFactors.push(`System: ${systemRisks[systemType].factor}`);
+        riskFactors.push(`Data: ${datasetRisks[datasetSize].factor}`);
+        riskFactors.push(`Audit: ${auditMitigation[auditLevel].factor}`);
+
+        // Determine risk level and color
+        let levelText, levelColor, recommendations;
+        if (baseRisk >= 70) {
+            levelText = 'HIGH RISK';
+            levelColor = 'text-red-600';
+            recommendations = 'Immediate action required: Implement multi-model consensus verification, conduct comprehensive bias audit, establish monitoring systems.';
+        } else if (baseRisk >= 40) {
+            levelText = 'MODERATE RISK';
+            levelColor = 'text-yellow-600';
+            recommendations = 'Mitigation recommended: Consider consensus verification, expand diversity testing, implement bias monitoring.';
+        } else {
+            levelText = 'LOW RISK';
+            levelColor = 'text-green-600';
+            recommendations = 'Continue monitoring: Maintain current practices, periodic bias assessments, stay updated on best practices.';
+        }
+
+        // Update UI
+        riskScore.textContent = `${baseRisk}%`;
+        riskScore.className = `text-4xl font-bold mb-2 ${levelColor}`;
+        riskLevel.textContent = levelText;
+        riskLevel.className = `text-sm mb-4 font-semibold ${levelColor}`;
+        
+        riskBreakdown.innerHTML = riskFactors.map(factor => 
+            `<div class="text-left p-2 bg-gray-50 rounded text-xs">${factor}</div>`
+        ).join('');
+        
+        riskRecommendations.innerHTML = `<strong>Recommendations:</strong><br>${recommendations}`;
+        
+        riskResults.classList.remove('hidden');
+    });
 });
 </script>
 </body>
