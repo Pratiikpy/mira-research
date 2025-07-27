@@ -1029,41 +1029,29 @@ Ensure all recommendations are evidence-based and cite relevant regulations wher
         }
 
         const promptText = `
-            You are a policy advisor specializing in AI ethics and regulation.
-            Your recommendations are based on the principles of verifiable AI and consensus mechanisms, as championed by the Mira Network.
-
-            Generate a concise, one-page policy brief on the topic: **"${topic}"**.
-
-            The brief should be structured with the following sections using Markdown formatting:
-
-            ### MEMORANDUM FOR POLICYMAKERS
-            **TO:** Interested Parties
-            **FROM:** AI Policy Advisory Group
-            **DATE:** ${new Date().toLocaleDateString()}
-            **SUBJECT:** Recommendations for Trustworthy AI in ${topic}
-
-            ### 1. The Challenge
-            Briefly describe the key risks and potential for algorithmic bias when AI is applied to the field of ${topic}.
-
-            ### 2. The Verifiable AI Solution
-            Explain how a consensus verification approach (like the Mira Network) provides a robust solution. Emphasize proactive prevention over reactive audits.
-
-            ### 3. Key Policy Recommendations
-            Provide 2-3 specific, actionable policy recommendations. For example:
-            - Mandate multi-model verification for high-risk AI systems in this domain.
-            - Create regulatory "safe harbors" for organizations that adopt and can prove the use of consensus-based AI verification.
-            - Fund research into diverse, independent AI models to serve in verification ensembles.
+            Generate a comprehensive policy brief on the topic: **"${topic}"**.
+            
+            Focus on AI bias implications and the role of consensus verification systems.
+            Include specific regulatory recommendations and implementation strategies.
+            
+            Topic: ${topic}
+            Date: ${new Date().toLocaleDateString()}
         `;
 
         showModal(`Generating Policy Brief...`, '<div class="flex justify-center items-center p-8"><div class="loader"></div></div>');
-        const result = await callGeminiAPI(promptText);
+        const result = await callGeminiAPI(promptText, 'policy');
         
+        // Enhanced HTML formatting for policy briefs
         let htmlResult = result
-            .replace(/### (.*)/g, '<h4 class="text-lg font-bold text-gray-800 mt-6 mb-2">$1</h4>')
-            .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+            .replace(/### (.*)/g, '<h4 class="text-lg font-bold text-gray-800 mt-6 mb-3 border-b border-gray-200 pb-2">$1</h4>')
+            .replace(/## (.*)/g, '<h3 class="text-xl font-bold text-gray-800 mt-8 mb-4">$1</h3>')
+            .replace(/\*\*(.*?)\*\*/g, '<strong class="text-blue-600">$1</strong>')
+            .replace(/\*(.*?)\*/g, '<em>$1</em>')
+            .replace(/- (.*)/g, '<li class="ml-4 mb-1">$1</li>')
+            .replace(/\n\n/g, '<br><br>')
             .replace(/\n/g, '<br>');
 
-        showModal(`Policy Brief: ${topic}`, `<div class="prose max-w-none">${htmlResult}</div>`);
+        showModal(`Policy Brief: ${topic}`, `<div class="prose max-w-none bg-gray-50 p-6 rounded-lg">${htmlResult}</div>`);
     });
 
     // Bias Risk Calculator functionality
