@@ -727,6 +727,106 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             }
         });
+
+        // Economic Impact Chart
+        const economicCtx = document.getElementById('economicChart');
+        if (economicCtx) {
+            if (window.economicChart instanceof Chart) {
+                window.economicChart.destroy();
+            }
+            window.economicChart = new Chart(economicCtx.getContext('2d'), {
+                type: 'doughnut',
+                data: {
+                    labels: ['Healthcare', 'Finance', 'Employment', 'Justice', 'Other'],
+                    datasets: [{
+                        data: [850, 500, 320, 180, 250],
+                        backgroundColor: [
+                            'rgba(239, 68, 68, 0.8)',
+                            'rgba(59, 130, 246, 0.8)',
+                            'rgba(16, 185, 129, 0.8)',
+                            'rgba(245, 158, 11, 0.8)',
+                            'rgba(139, 92, 246, 0.8)'
+                        ],
+                        borderWidth: 2,
+                        borderColor: '#ffffff'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                padding: 15,
+                                usePointStyle: true
+                            }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return `${context.label}: $${context.raw}B annually`;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Timeline Impact Chart
+        const timelineCtx = document.getElementById('timelineChart');
+        if (timelineCtx) {
+            if (window.timelineChart instanceof Chart) {
+                window.timelineChart.destroy();
+            }
+            window.timelineChart = new Chart(timelineCtx.getContext('2d'), {
+                type: 'line',
+                data: {
+                    labels: ['2018', '2020', '2022', '2024', '2026'],
+                    datasets: [{
+                        label: 'Regulatory Actions',
+                        data: [2, 8, 15, 28, 45],
+                        borderColor: 'rgba(74, 144, 226, 1)',
+                        backgroundColor: 'rgba(74, 144, 226, 0.1)',
+                        borderWidth: 3,
+                        fill: true,
+                        tension: 0.4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return `${context.raw} new regulations/laws`;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: 'Number of Actions'
+                            }
+                        },
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Year'
+                            }
+                        }
+                    }
+                }
+            });
+        }
     };
     
     // Use Intersection Observer to render charts only when they are visible
