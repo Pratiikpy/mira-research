@@ -173,6 +173,42 @@
                 <p class="mt-6 max-w-3xl mx-auto text-lg md:text-xl text-gray-600">
                     Contemporary AI systems inherit and amplify human biases, causing billions in economic damage and perpetuating social inequity. Traditional fixes are not enough. A new architecture is required.
                 </p>
+                
+                <!-- Educational Pathways -->
+                <div class="mt-12 max-w-4xl mx-auto">
+                    <div class="stat-card bg-gradient-to-br from-purple-50 to-indigo-50 border-2 border-purple-200">
+                        <h3 class="text-2xl font-bold text-center mb-4 text-purple-800">🎓 Choose Your Learning Path</h3>
+                        <p class="text-center text-gray-600 mb-6">Explore AI bias from your perspective</p>
+                        
+                        <div class="grid md:grid-cols-3 gap-4">
+                            <button class="learning-path-btn bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 px-4 rounded-lg transition" data-path="beginner">
+                                👋 Beginner<br><span class="text-sm font-normal">New to AI bias</span>
+                            </button>
+                            <button class="learning-path-btn bg-green-500 hover:bg-green-600 text-white font-bold py-3 px-4 rounded-lg transition" data-path="technical">
+                                🔧 Technical<br><span class="text-sm font-normal">Developers & Engineers</span>
+                            </button>
+                            <button class="learning-path-btn bg-red-500 hover:bg-red-600 text-white font-bold py-3 px-4 rounded-lg transition" data-path="policy">
+                                📜 Policy<br><span class="text-sm font-normal">Leaders & Regulators</span>
+                            </button>
+                        </div>
+                        
+                        <div id="learning-content" class="mt-6 hidden">
+                            <div class="bg-white p-6 rounded-lg border border-gray-200">
+                                <div id="learning-text" class="text-left"></div>
+                                <div class="mt-4 flex justify-between">
+                                    <button id="prev-step" class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded-lg disabled:opacity-50">
+                                        ← Previous
+                                    </button>
+                                    <span id="step-indicator" class="text-gray-600 font-medium"></span>
+                                    <button id="next-step" class="bg-purple-500 hover:bg-purple-600 text-white font-bold py-2 px-4 rounded-lg">
+                                        Next →
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
                 <div class="mt-12 grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto">
                     <div class="stat-card">
                         <p class="text-5xl font-extrabold text-[#4A90E2]">44%</p>
