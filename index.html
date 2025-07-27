@@ -1277,8 +1277,269 @@ Ensure all recommendations are evidence-based and cite relevant regulations wher
     // Event listener for risk calculator
     document.getElementById('calculate-risk').addEventListener('click', calculateBiasRisk);
 
-    // Enhanced feedback collection system
-    const createFeedbackForm = () => {
+    // Educational Pathways System
+    const learningPaths = {
+        beginner: {
+            title: "Beginner's Guide to AI Bias",
+            steps: [
+                {
+                    title: "What is AI Bias?",
+                    content: `<h5 class="font-bold text-lg mb-3">AI Bias Explained Simply</h5>
+                    <p class="mb-3">AI bias occurs when artificial intelligence systems make unfair decisions that favor one group over another. Think of it like a biased human judge, but operating at massive scale.</p>
+                    <p class="mb-3"><strong>Example:</strong> A resume screening AI that automatically rejects applications from women because it was trained on historical data showing mostly men were hired.</p>
+                    <div class="bg-yellow-50 p-3 rounded mt-4">
+                        <p class="text-sm"><strong>Key Point:</strong> AI systems learn from human-created data, so they inherit our biases and prejudices.</p>
+                    </div>`
+                },
+                {
+                    title: "Why Does This Matter?",
+                    content: `<h5 class="font-bold text-lg mb-3">Real-World Impact</h5>
+                    <p class="mb-3">AI bias affects millions of people daily in critical decisions:</p>
+                    <ul class="list-disc pl-6 mb-3">
+                        <li><strong>Healthcare:</strong> Misdiagnosis affecting certain racial groups</li>
+                        <li><strong>Hiring:</strong> Qualified candidates rejected due to gender or age</li>
+                        <li><strong>Finance:</strong> Loan denials based on zip code or name</li>
+                        <li><strong>Justice:</strong> Unfair sentencing recommendations</li>
+                    </ul>
+                    <div class="bg-red-50 p-3 rounded mt-4">
+                        <p class="text-sm"><strong>The Cost:</strong> AI bias costs the US economy $3.1 trillion annually and perpetuates social inequality.</p>
+                    </div>`
+                },
+                {
+                    title: "The Mira Solution",
+                    content: `<h5 class="font-bold text-lg mb-3">How Consensus Verification Works</h5>
+                    <p class="mb-3">Instead of trusting one AI system, Mira uses multiple AI models to verify each decision:</p>
+                    <div class="bg-blue-50 p-4 rounded mb-3">
+                        <p class="text-sm"><strong>Step 1:</strong> Send the same question to 3+ different AI models</p>
+                        <p class="text-sm"><strong>Step 2:</strong> Compare their answers</p>
+                        <p class="text-sm"><strong>Step 3:</strong> Only accept decisions where all models agree</p>
+                        <p class="text-sm"><strong>Step 4:</strong> If they disagree, flag for human review</p>
+                    </div>
+                    <p class="mb-3"><strong>Result:</strong> Accuracy improves from 73.1% to 95.6% - an 83% reduction in errors!</p>`
+                },
+                {
+                    title: "What You Can Do",
+                    content: `<h5 class="font-bold text-lg mb-3">Taking Action</h5>
+                    <div class="space-y-3">
+                        <div class="bg-green-50 p-3 rounded">
+                            <p class="text-sm"><strong>As a Consumer:</strong> Ask companies about their AI bias testing and demand transparency</p>
+                        </div>
+                        <div class="bg-blue-50 p-3 rounded">
+                            <p class="text-sm"><strong>As an Employee:</strong> Advocate for diverse AI teams and bias audits in your organization</p>
+                        </div>
+                        <div class="bg-purple-50 p-3 rounded">
+                            <p class="text-sm"><strong>As a Citizen:</strong> Support legislation requiring AI bias audits and consensus verification</p>
+                        </div>
+                    </div>
+                    <p class="mt-4 text-sm text-gray-600">The future of AI depends on making these systems fair and trustworthy for everyone.</p>`
+                }
+            ]
+        },
+        technical: {
+            title: "Technical Deep Dive",
+            steps: [
+                {
+                    title: "Bias Detection Techniques",
+                    content: `<h5 class="font-bold text-lg mb-3">Current State of Bias Detection</h5>
+                    <p class="mb-3">Traditional approaches fall into three categories:</p>
+                    <ul class="list-disc pl-6 mb-3">
+                        <li><strong>Pre-processing:</strong> Data augmentation, re-weighting, SMOTE</li>
+                        <li><strong>In-processing:</strong> Fairness constraints, adversarial debiasing</li>
+                        <li><strong>Post-processing:</strong> Threshold optimization, calibration</li>
+                    </ul>
+                    <div class="bg-yellow-50 p-3 rounded mt-4">
+                        <p class="text-sm"><strong>Problem:</strong> All create fairness-accuracy trade-offs and are reactive rather than proactive.</p>
+                    </div>`
+                },
+                {
+                    title: "Consensus Architecture",
+                    content: `<h5 class="font-bold text-lg mb-3">Multi-Model Ensemble Design</h5>
+                    <pre class="bg-gray-100 p-3 rounded text-sm mb-3"><code>
+class ConsensusVerifier:
+    def __init__(self, models):
+        self.models = models
+        self.threshold = 1.0  # 100% agreement
+    
+    def verify(self, input_data):
+        predictions = []
+        for model in self.models:
+            pred = model.predict(input_data)
+            predictions.append(pred)
+        
+        if self.has_consensus(predictions):
+            return predictions[0]
+        else:
+            return self.flag_for_review(predictions)
+                    </code></pre>
+                    <p class="text-sm"><strong>Key:</strong> Model diversity is crucial - different architectures, training data, and objectives.</p>`
+                },
+                {
+                    title: "Implementation Strategies",
+                    content: `<h5 class="font-bold text-lg mb-3">Deployment Considerations</h5>
+                    <div class="space-y-3">
+                        <div class="bg-blue-50 p-3 rounded">
+                            <p class="text-sm"><strong>Model Selection:</strong> Use diverse architectures (CNN, RNN, Transformer) and training datasets</p>
+                        </div>
+                        <div class="bg-green-50 p-3 rounded">
+                            <p class="text-sm"><strong>Consensus Metrics:</strong> Implement Cohen's kappa, inter-rater reliability, confidence intervals</p>
+                        </div>
+                        <div class="bg-purple-50 p-3 rounded">
+                            <p class="text-sm"><strong>Monitoring:</strong> Real-time disagreement tracking, bias drift detection, model performance dashboards</p>
+                        </div>
+                    </div>
+                    <p class="mt-4 text-sm text-gray-600">Performance: 95.6% precision with 3-model consensus (vs 73.1% single model)</p>`
+                },
+                {
+                    title: "Integration & Scaling",
+                    content: `<h5 class="font-bold text-lg mb-3">Production Implementation</h5>
+                    <div class="bg-gray-100 p-3 rounded mb-3">
+                        <p class="text-sm font-mono">
+                            API Gateway → Load Balancer → Model Ensemble → Consensus Engine → Response
+                        </p>
+                    </div>
+                    <ul class="list-disc pl-6 mb-3 text-sm">
+                        <li><strong>Latency:</strong> ~2-3x single model (parallelizable)</li>
+                        <li><strong>Costs:</strong> Higher compute but lower bias-related legal costs</li>
+                        <li><strong>Reliability:</strong> Graceful degradation with model failures</li>
+                    </ul>
+                    <div class="bg-green-50 p-3 rounded">
+                        <p class="text-sm"><strong>ROI:</strong> 13% for strategic AI implementations vs 5.9% for traditional approaches</p>
+                    </div>`
+                }
+            ]
+        },
+        policy: {
+            title: "Policy & Regulation Guide",
+            steps: [
+                {
+                    title: "Current Regulatory Landscape",
+                    content: `<h5 class="font-bold text-lg mb-3">Global AI Bias Regulations</h5>
+                    <div class="space-y-3">
+                        <div class="bg-blue-50 p-3 rounded">
+                            <p class="text-sm"><strong>EU AI Act (2024):</strong> Mandates bias audits for high-risk AI systems</p>
+                        </div>
+                        <div class="bg-green-50 p-3 rounded">
+                            <p class="text-sm"><strong>NYC Local Law 144:</strong> Requires bias audits for hiring algorithms</p>
+                        </div>
+                        <div class="bg-purple-50 p-3 rounded">
+                            <p class="text-sm"><strong>Colorado AI Act:</strong> Creates duty of care for AI developers</p>
+                        </div>
+                    </div>
+                    <p class="mt-4 text-sm text-gray-600">Trend: Shift from voluntary principles to mandatory compliance requirements</p>`
+                },
+                {
+                    title: "Compliance Requirements",
+                    content: `<h5 class="font-bold text-lg mb-3">What Organizations Must Do</h5>
+                    <ul class="list-disc pl-6 mb-3 text-sm">
+                        <li><strong>Documentation:</strong> Maintain records of AI system design and testing</li>
+                        <li><strong>Auditing:</strong> Conduct regular bias assessments with third-party validation</li>
+                        <li><strong>Transparency:</strong> Publish bias audit results and remediation plans</li>
+                        <li><strong>Human Oversight:</strong> Implement meaningful human review processes</li>
+                    </ul>
+                    <div class="bg-yellow-50 p-3 rounded mt-4">
+                        <p class="text-sm"><strong>Penalties:</strong> Up to $1,500 per violation per day under NYC law</p>
+                    </div>`
+                },
+                {
+                    title: "Policy Recommendations",
+                    content: `<h5 class="font-bold text-lg mb-3">Strategic Policy Approach</h5>
+                    <div class="space-y-3">
+                        <div class="bg-green-50 p-3 rounded">
+                            <p class="text-sm"><strong>Incentivize Consensus:</strong> Create regulatory safe harbors for consensus verification systems</p>
+                        </div>
+                        <div class="bg-blue-50 p-3 rounded">
+                            <p class="text-sm"><strong>Fund Research:</strong> Support development of diverse AI models for verification ensembles</p>
+                        </div>
+                        <div class="bg-purple-50 p-3 rounded">
+                            <p class="text-sm"><strong>International Cooperation:</strong> Harmonize standards across jurisdictions</p>
+                        </div>
+                    </div>
+                    <p class="mt-4 text-sm text-gray-600">Goal: Create market incentives for verifiably fair AI systems</p>`
+                },
+                {
+                    title: "Implementation Roadmap",
+                    content: `<h5 class="font-bold text-lg mb-3">Phased Implementation Strategy</h5>
+                    <div class="space-y-3">
+                        <div class="bg-red-50 p-3 rounded">
+                            <p class="text-sm"><strong>Phase 1 (2025):</strong> High-risk sectors (healthcare, finance, justice)</p>
+                        </div>
+                        <div class="bg-orange-50 p-3 rounded">
+                            <p class="text-sm"><strong>Phase 2 (2026):</strong> Employment and education systems</p>
+                        </div>
+                        <div class="bg-green-50 p-3 rounded">
+                            <p class="text-sm"><strong>Phase 3 (2027):</strong> Consumer-facing AI applications</p>
+                        </div>
+                    </div>
+                    <div class="bg-blue-50 p-3 rounded mt-4">
+                        <p class="text-sm"><strong>Success Metrics:</strong> Reduced discrimination complaints, improved AI accuracy, increased public trust</p>
+                    </div>`
+                }
+            ]
+        }
+    };
+
+    let currentPath = null;
+    let currentStep = 0;
+
+    // Learning path event listeners
+    document.querySelectorAll('.learning-path-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const path = btn.dataset.path;
+            startLearningPath(path);
+        });
+    });
+
+    function startLearningPath(pathName) {
+        currentPath = pathName;
+        currentStep = 0;
+        showLearningStep();
+        document.getElementById('learning-content').classList.remove('hidden');
+    }
+
+    function showLearningStep() {
+        const path = learningPaths[currentPath];
+        const step = path.steps[currentStep];
+        
+        document.getElementById('learning-text').innerHTML = step.content;
+        document.getElementById('step-indicator').textContent = `${currentStep + 1} of ${path.steps.length}`;
+        
+        // Update button states
+        document.getElementById('prev-step').disabled = currentStep === 0;
+        document.getElementById('next-step').textContent = currentStep === path.steps.length - 1 ? 'Complete' : 'Next →';
+    }
+
+    // Step navigation
+    document.getElementById('prev-step').addEventListener('click', () => {
+        if (currentStep > 0) {
+            currentStep--;
+            showLearningStep();
+        }
+    });
+
+    document.getElementById('next-step').addEventListener('click', () => {
+        if (currentStep < learningPaths[currentPath].steps.length - 1) {
+            currentStep++;
+            showLearningStep();
+        } else {
+            // Completed pathway
+            document.getElementById('learning-text').innerHTML = `
+                <div class="text-center">
+                    <h5 class="font-bold text-lg mb-3">🎉 Pathway Complete!</h5>
+                    <p class="mb-4">You've completed the ${learningPaths[currentPath].title}.</p>
+                    <div class="space-y-2">
+                        <button class="w-full bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded" onclick="location.href='#problem'">
+                            Explore Case Studies
+                        </button>
+                        <button class="w-full bg-green-500 hover:bg-green-600 text-white py-2 px-4 rounded" onclick="location.href='#solution'">
+                            Learn About Mira Solution
+                        </button>
+                    </div>
+                </div>
+            `;
+            document.getElementById('prev-step').style.display = 'none';
+            document.getElementById('next-step').style.display = 'none';
+        }
+    });
         const feedbackHTML = `
             <div class="mt-16 max-w-2xl mx-auto stat-card bg-gradient-to-br from-green-50 to-emerald-50 border-2 border-green-200">
                 <h3 class="text-2xl font-bold text-center mb-4 text-green-800">📝 Contribute to Research</h3>
